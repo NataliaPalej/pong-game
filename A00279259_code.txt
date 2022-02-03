@@ -1,0 +1,135 @@
+from sense_hat import SenseHat
+import time
+sense = SenseHat()
+ 
+white = (255, 255, 255)
+yellow = (255, 255, 0)
+pink = (255,20,147)
+ 
+#bat coordinates on y-axis, can be between 1-6 as we assign to it three pixels long
+bat_y = 4
+ 
+ball_position = [3, 3]
+#posiion where the ball moves
+ball_velocity = [1, 1]
+ 
+ball_position2 = [6, 5]
+ball_velocity2 = [1, 1]
+ 
+ball_lives = 3
+ 
+score = 0
+ 
+ball_speed = 0.25
+ 
+#ball position x = position 0 in arrey, y = position 1.
+def draw_ball():
+    lives()
+    my_score()
+    sense.set_pixel(ball_position[0], ball_position[1], yellow)
+    #moving ball on x-axis
+    ball_position[0] += ball_velocity[0]
+    if ball_position[0] == 7 or ball_position[0] == 0:
+        #revesing ball if it reaches 7 or 0
+        ball_velocity[0] = -ball_velocity[0]
+    #moving ball on y-axis
+    ball_position[1] += ball_velocity[1]
+    if ball_position[1] == 7 or ball_position[1] == 0:  
+        ball_velocity[1] = -ball_velocity[1]
+    #collision condition
+    if ball_position[0] == 1 and (bat_y-1) <= ball_position[1] <= (bat_y+1):
+        ball_velocity[0] = -ball_velocity[0]
+ 
+#draw second ball to increase difficulty 
+def draw_ball2():
+    sense.set_pixel(ball_position2[0], ball_position2[1], pink)
+    ball_position2[0] += ball_velocity2[0]
+    if ball_position2[0] == 7 or ball_position2[0] == 0:
+        ball_velocity2[0] = -ball_velocity2[0]
+    ball_position2[1] += ball_velocity2[1]
+    if ball_position2[1] == 7 or ball_position2[1] == 0:
+        ball_velocity2[1] = -ball_velocity2[1]
+    if ball_position2[0] == 1 and (bat_y-1) <= ball_position2[1] <= (bat_y+1):
+        ball_velocity2[0] = -ball_velocity2[0]
+ 
+def draw_bat():
+    sense.clear()
+    sense.set_pixel(0, bat_y, white)
+    sense.set_pixel(0, bat_y + 1, white)
+    sense.set_pixel(0, bat_y - 1, white)
+ 
+#joystick: press/release/hold/left/right/up/down
+def move_up(event):
+    global bat_y
+    #adding bat_y>1 to avoid bat going outside the room (top)
+    if event.action == 'pressed' and bat_y > 1:
+        bat_y -= 1
+        
+def move_down(event):
+    global bat_y
+    #limit of y=6 as the bat is takin' 3 pixel-positions
+    #bat_y < 6 avoids bat going outside the room (bottom)
+    if event.action == 'pressed' and bat_y < 6:
+        bat_y += 1
+ 
+#lives function
+def lives():
+    global ball_lives
+    global ball_position
+    global ball_velocity
+    if ball_position[0] == 0:
+        ball_lives = ball_lives - 1
+        #position where the ball moves
+        ball_position = [3, 3]
+        ball_velocity = [1, 1]
+        time.sleep(0.5)
+    if ball_lives == 0:
+        sense.show_message("you lost")
+        #posiion where the ball moves
+        
+def my_score():
+    global score
+    global ball_position
+    global ball_position2
+    global ball_velocity
+    global ball_velocity2
+    global ball_speed
+    if ball_position[0] == 1 and (ball_position[1] == bat_y or ball_position[1] == bat_y-1 or ball_position[1] == bat_y + 1):
+      score += 1
+      time.sleep(0.25)
+      print(score)
+    if ball_position2[0] == 1 and (ball_position2[1] == bat_y or ball_position2[1] == bat_y-1 or ball_position2[1] == bat_y + 1):
+      score += 1
+      time.sleep(0.25)
+      print(score)
+    if score == 5:
+      print("INCREASE DIFFICULTY")
+    if score > 5:
+      draw_ball2()
+    if score == 10:
+      print("INCREASE DIFFICULTY LVL 2")
+    if score > 10:
+      ball_speed = 0.2
+    
+def gameplay():
+  global ball_speed
+  #checks if event was triggered
+  while True:
+      sense.stick.direction_up = move_up
+      draw_bat()
+      draw_ball()
+      time.sleep(ball_speed)
+      sense.stick.direction_down = move_down
+      draw_bat()
+      draw_ball()
+      time.sleep(ball_speed)
+ 
+sense.show_message("press to start")
+while True:
+  events = sense.stick.get_events()
+  if events:
+    for click in events:
+        if click.direction == 'middle' and click.action == 'released':
+             gameplay()
+        elif click.direction != 'middle':
+          print("Press middle button to start")
