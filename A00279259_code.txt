@@ -1,27 +1,27 @@
 from sense_hat import SenseHat
 import time
 sense = SenseHat()
- 
+
 white = (255, 255, 255)
 yellow = (255, 255, 0)
 pink = (255,20,147)
- 
+
 #bat coordinates on y-axis, can be between 1-6 as we assign to it three pixels long
 bat_y = 4
- 
+
 ball_position = [3, 3]
 #posiion where the ball moves
 ball_velocity = [1, 1]
- 
+
 ball_position2 = [6, 5]
 ball_velocity2 = [1, 1]
- 
+
 ball_lives = 3
- 
+
 score = 0
- 
+
 ball_speed = 0.25
- 
+
 #ball position x = position 0 in arrey, y = position 1.
 def draw_ball():
     lives()
@@ -39,7 +39,7 @@ def draw_ball():
     #collision condition
     if ball_position[0] == 1 and (bat_y-1) <= ball_position[1] <= (bat_y+1):
         ball_velocity[0] = -ball_velocity[0]
- 
+
 #draw second ball to increase difficulty 
 def draw_ball2():
     sense.set_pixel(ball_position2[0], ball_position2[1], pink)
@@ -51,13 +51,13 @@ def draw_ball2():
         ball_velocity2[1] = -ball_velocity2[1]
     if ball_position2[0] == 1 and (bat_y-1) <= ball_position2[1] <= (bat_y+1):
         ball_velocity2[0] = -ball_velocity2[0]
- 
+
 def draw_bat():
     sense.clear()
     sense.set_pixel(0, bat_y, white)
     sense.set_pixel(0, bat_y + 1, white)
     sense.set_pixel(0, bat_y - 1, white)
- 
+
 #joystick: press/release/hold/left/right/up/down
 def move_up(event):
     global bat_y
@@ -83,6 +83,8 @@ def lives():
         ball_position = [3, 3]
         ball_velocity = [1, 1]
         time.sleep(0.5)
+    if score == 15:
+      ball_lives += 1
     if ball_lives == 0:
         sense.show_message("you lost")
         #posiion where the ball moves
@@ -123,7 +125,7 @@ def gameplay():
       draw_bat()
       draw_ball()
       time.sleep(ball_speed)
- 
+
 sense.show_message("press to start")
 while True:
   events = sense.stick.get_events()
